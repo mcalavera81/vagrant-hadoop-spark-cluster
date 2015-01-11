@@ -18,3 +18,17 @@ contains dependecies for the mongo hadoop connector. Should be copied to $HADOOP
 
 
 Some issues to be aware of:
+Hive doesn't recognize camelCase fields by default.
+You need to add a section like so to work around it:
+WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "valuedate":"valueDate", "accountid":"accountId", "cardnumber":"cardNumber","bankid":"bankId"}')
+
+
+All scripts are to be started from node-1 (node1):
+start-all.sh --> starts hdfs, yarn and derby db for yarn metadata
+stop-all.sh --> stops hdfs, yarn and derby db for yarn metadata
+start-spark-standalone.sh --> starts spark in standalone mode (master on this node (node1) and a worker on each node specified in conf/slaves)
+stop-spark-standalone.sh --> stops spark in standalone mode (master on this node (node1) and a worker on each node specified in conf/slaves)
+
+node1: contains the nodename, spark master (standalone)
+node2: contains the resource manager, the proxy server and history server.
+node3: and node4 : contains the datanodes and nodemanagers and spark slaves (standalone).
