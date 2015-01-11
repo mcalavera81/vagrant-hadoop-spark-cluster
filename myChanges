@@ -1,0 +1,20 @@
+resources/spark-1.2.0-bin-2.6.0.tgz
+building a new spark distribution with hive support.
+./make-distribution.sh --tgz  -Pyarn -Phadoop-2.4 -Dhadoop.version=2.6.0 -Phive -DskipTests clean package
+
+resources/native-hadoop
+The result of building hadoop sources.
+http://www.myiphoneadventure.com/hardware/hadoop-build-native-library
+A slight change for path issues(--prefix=/usr):
+./configure --prefix=/usr
+make
+make install
+
+mongo-hadoop-connector-hadoop-2.6.0-hive-0.14.0.tar
+contains dependecies for the mongo hadoop connector. Should be copied to $HADOOP_HOME/share/hadoop/mapreduce/.
+1) Mongo java Driver
+2) Mongo Hadoop 
+3) Mongo Hive
+
+
+Some issues to be aware of:
