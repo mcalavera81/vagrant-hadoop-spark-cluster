@@ -10,6 +10,7 @@ A slight change for path issues(--prefix=/usr):
 make
 make install
 
+Buidling:./gradlew jar -PhadoopVersion=2.6.0 -DhiveVersion=0.14.0
 mongo-hadoop-connector-hadoop-2.6.0-hive-0.14.0.tar
 contains dependecies for the mongo hadoop connector. Should be copied to $HADOOP_HOME/share/hadoop/mapreduce/.
 1) Mongo java Driver
@@ -24,11 +25,21 @@ WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "valuedate":"valueDat
 
 
 All scripts are to be started from node-1 (node1):
+before anything ww should format hdfs with format-hdfs.sh
+
 start-all.sh --> starts hdfs, yarn and derby db for yarn metadata
 stop-all.sh --> stops hdfs, yarn and derby db for yarn metadata
 start-spark-standalone.sh --> starts spark in standalone mode (master on this node (node1) and a worker on each node specified in conf/slaves)
 stop-spark-standalone.sh --> stops spark in standalone mode (master on this node (node1) and a worker on each node specified in conf/slaves)
 
+start-yarn.sh and stoy-yarn-sh should be executed from the node2
+for instance we could ssh node2 '/vagrant/start-yarn.sh'
+
 node1: contains the nodename, spark master (standalone)
 node2: contains the resource manager, the proxy server and history server.
 node3: and node4 : contains the datanodes and nodemanagers and spark slaves (standalone).
+
+Hive installation
+http://tecadmin.net/install-apache-hive-on-centos-rhel/
+Loading hive table
+hive -f  /vagrant/resources/hive/ddl_tx.sql
