@@ -11,7 +11,7 @@ make
 make install
 
 Buidling:./gradlew jar -PhadoopVersion=2.6.0 -DhiveVersion=0.14.0
-mongo-hadoop-connector-hadoop-2.6.0-hive-0.14.0.tar
+mongo-hadoop-connector-hadoop-2.6.0-hive-0.14.0.tar (contains 3 jar files)
 contains dependecies for the mongo hadoop connector. Should be copied to $HADOOP_HOME/share/hadoop/mapreduce/.
 1) Mongo java Driver
 2) Mongo Hadoop 
@@ -43,3 +43,64 @@ Hive installation
 http://tecadmin.net/install-apache-hive-on-centos-rhel/
 Loading hive table
 hive -f  /vagrant/resources/hive/ddl_tx.sql
+
+Pretty useful command to synch folders:
+rsync --delete -azP . node2:$(pwd)
+
+#WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "valuedate":"valueDate", "accountid":"accountId", "cardnumber":"cardNumber","bankid":"bankId"}')
+
+
+Installing tez:
+http://doc.mapr.com/display/MapR/Installing+Tez
+http://tez.apache.org/install.html
+
+1) Building tez from the source
+2) Put the extracted jar files from tez-0.7.0-SNAPSHOT.tar.gz (big one) on the hdfs (tar -xf tez-0.7.0-SNAPSHOT.tar.gz)
+3) Configure the tez-site.xml properly according to the hdfs path of the previous step, so that every node can find the tez jars.
+ <property>
+    <name>tez.lib.uris</name>
+    <value>hdfs://node1:8020/apps/tezHdfs,${fs.default.name}/apps/tezHdfs/lib</value>
+  </property>
+  Only on the client node apparently.
+4) set TEZ_CONF_DIR to the location of tez-site.xml: export TEZ_CONF_DIR=/usr/local/tez/conf (/etc/profile.d/tez.sh)
+5) export TEZ_JARS=/usr/local/tez (/etc/profile.d/tez.sh)
+6) Extends the (hadoop) classpath with the jars from tez (minimal) (only on the client node??):
+	(tar -xvzf tez-dist/target/tez-0.7.0-SNAPSHOT-minimal.tar.gz  -C $TEZ_JARS)
+	export HADOOP_CLASSPATH=${TEZ_CONF_DIR}:${TEZ_JARS}/*:${TEZ_JARS}/lib/*:$HADOOP_CLASSPATH (/etc/profile.d/hadoop.sh)
+	
+	
+
+Pending tasks:
+	1) try to run a normal map reduce join and check that is run with tez
+	2) Run hive on tez.
+
+	On all nodes, edit the mapred-site.xml file to use yarn-tez as the MapReduce framework by adding the following section:
+<property>
+   <name>mapreduce.framework.name</name>
+   <value>yarn-tez</value>
+</property>
+Run a normal MapReduce job, and confirm that the job is submitted through the Tez DAG AppMaster
+
+
+In order for hive on tez to work you have to do the following:
+- set hive.execution.engine=tez;
+If you want to use Bson backed tables yo need to add the mongo-hadoop dependencies (mongo-hadoop-connector-hadoop-2.6.0-hive-0.14.0.tar)on the hdfs classpath
+to be available for the workers:
+hadoop fs -put mongo-*.jar  /apps/tezHdfs/lib
+Thisw runs a yarn app.
+
+Comments on HiveServer2:
+Start hiveServer2: $HIVE_HOME/bin/hiveserver2 provides with a jdbc/odbc/thrift interface to hive.
+which by default listens on port 10000.
+
+You can connect with a client like datastudio pointing to port 10000.
+Datastudio already has a hive jdbc driver.
+
+As I'm working with a vagrant deployment I need to connect with the vagrant user (no password).
+But  I have to give permissions to the vagrant user by adding him to the supergroup group.
+
+
+
+
+
+
